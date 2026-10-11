@@ -1,3 +1,5 @@
+const { constrainedMemory } = require("node:process")
+
 let a, b
 // console.log(`a:${b}, b:${a}`) 
 
@@ -396,7 +398,29 @@ myNums = [1, 2, 3]
 //     return acc + currval
 // }, 0)
 
-console.log(myTotal);
+
 
 // 32:59
 
+const myTotal = myNums.reduce( (acc, curr) => acc+curr, 0)
+
+// console.log(myTotal);
+
+const shoppingCart = [
+  {
+    itemName: "js course",
+    price: 299
+  },
+  {
+    itemName: "python course",
+    price: 999
+  },
+  {
+    itemName: "mobile dev course",
+    price: 699
+  },
+]
+
+const priceToPay = shoppingCart.reduce( (acc, item) => acc + item.price, 0)
+
+console.log(priceToPay);
