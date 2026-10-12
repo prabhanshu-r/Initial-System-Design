@@ -768,21 +768,7 @@ TypeError
 
 ---
 
-# 7. Map, Set, WeakMap, Optional Chaining, Nullish Coalescing
-
-## Map
-
-Key-value pairs.
-
-```js
-const map = new Map();
-
-map.set("name", "John");
-
-console.log(map.get("name"));
-```
-
----
+# 7. Set, WeakMap
 
 ## Set
 
@@ -813,27 +799,6 @@ const user = {};
 
 wm.set(user, "secret");
 ```
-
----
-
-## Optional Chaining
-
-```js
-const user = {};
-
-console.log(user.address?.city);
-```
-
----
-
-## Nullish Coalescing
-
-```js
-let username = null;
-
-console.log(username ?? "Guest");
-```
-
 ---
 
 # 8. Date Handling
@@ -894,33 +859,1396 @@ console.log(dayjs().format("YYYY-MM-DD"));
 ```
 
 ---
+# JavaScript Asynchronous Programming (Backend-Focused)
 
-# Quick Revision Checklist
+Asynchronous programming is one of the most important concepts in Node.js because JavaScript runs on a single thread. Understanding these concepts will help you write efficient and scalable backend applications.
 
-- [ ] Scope
-- [ ] Closures
-- [ ] Hoisting
-- [ ] this keyword
-- [ ] call()
-- [ ] apply()
-- [ ] bind()
-- [ ] Arrow Functions and this
-- [ ] Prototypes
-- [ ] Classes
-- [ ] Inheritance
-- [ ] Getters and Setters
-- [ ] Private Fields (#)
-- [ ] CommonJS (require/module.exports)
-- [ ] ES Modules (import/export)
-- [ ] try/catch/finally
-- [ ] Custom Errors
-- [ ] JSON.parse()
-- [ ] JSON.stringify()
-- [ ] Map
-- [ ] Set
-- [ ] WeakMap
-- [ ] Optional Chaining (?.)
-- [ ] Nullish Coalescing (??)
-- [ ] Date Handling
-- [ ] date-fns
-- [ ] dayjs
+---
+
+# 1. Event Loop
+
+The Event Loop allows JavaScript to perform non-blocking operations despite being single-threaded.
+
+## Components
+
+### Call Stack
+
+Executes synchronous code.
+
+```js
+function one() {
+  console.log("One");
+}
+
+function two() {
+  one();
+  console.log("Two");
+}
+
+two();
+```
+
+Execution Order:
+
+```txt
+Call Stack
+two()
+one()
+```
+
+Output:
+
+```txt
+One
+Two
+```
+
+---
+
+### Web APIs / Node APIs
+
+Handle asynchronous operations like:
+
+- setTimeout
+- HTTP requests
+- File system operations
+- Database queries
+
+---
+
+### Microtask Queue
+
+Higher priority queue.
+
+Contains:
+
+- Promise callbacks
+- queueMicrotask()
+
+```js
+Promise.resolve().then(() => {
+  console.log("Microtask");
+});
+```
+
+---
+
+### Macrotask Queue
+
+Lower priority queue.
+
+Contains:
+
+- setTimeout
+- setInterval
+- setImmediate
+
+```js
+setTimeout(() => {
+  console.log("Macrotask");
+}, 0);
+```
+
+---
+
+## Execution Example
+
+```js
+console.log("Start");
+
+setTimeout(() => {
+  console.log("Timeout");
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log("Promise");
+});
+
+console.log("End");
+```
+
+Output:
+
+```txt
+Start
+End
+Promise
+Timeout
+```
+
+Execution Order:
+
+1. Call Stack
+2. Microtask Queue
+3. Macrotask Queue
+
+---
+
+# 2. Callbacks and Callback Hell
+
+## Callback
+
+A function passed as an argument to another function.
+
+```js
+function greet(name, callback) {
+  console.log(`Hello ${name}`);
+
+  callback();
+}
+
+greet("John", () => {
+  console.log("Welcome");
+});
+```
+
+---
+
+## Callback Hell
+
+Deeply nested callbacks become difficult to read and maintain.
+
+```js
+getUser(userId, (user) => {
+  getOrders(user.id, (orders) => {
+    getPayment(orders[0], (payment) => {
+      console.log(payment);
+    });
+  });
+});
+```
+
+Problems:
+
+- Hard to read
+- Hard to debug
+- Difficult error handling
+
+---
+
+# 3. Promises
+
+A Promise represents a value that may be available now, later, or never.
+
+## Creating a Promise
+
+```js
+const promise = new Promise((resolve, reject) => {
+  const success = true;
+
+  if (success) {
+    resolve("Success");
+  } else {
+    reject("Failed");
+  }
+});
+```
+
+---
+
+## then()
+
+Handles successful completion.
+
+```js
+promise.then((result) => {
+  console.log(result);
+});
+```
+
+---
+
+## catch()
+
+Handles errors.
+
+```js
+promise
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+```
+
+---
+
+## finally()
+
+Runs regardless of success or failure.
+
+```js
+promise
+  .finally(() => {
+    console.log("Completed");
+  });
+```
+
+---
+
+## Promise Chaining
+
+```js
+Promise.resolve(2)
+  .then((num) => num * 2)
+  .then((num) => num * 3)
+  .then((num) => console.log(num));
+```
+
+Output:
+
+```txt
+12
+```
+
+---
+
+# 4. Async / Await
+
+Provides cleaner syntax for working with Promises.
+
+---
+
+## Async Function
+
+```js
+async function hello() {
+  return "Hello";
+}
+```
+
+Automatically returns a Promise.
+
+---
+
+## Await
+
+Pauses execution until a Promise resolves.
+
+```js
+async function fetchData() {
+  const data = await Promise.resolve("Data");
+
+  console.log(data);
+}
+
+fetchData();
+```
+
+---
+
+## Error Handling with Async/Await
+
+```js
+async function getUser() {
+  try {
+    const user = await fetchUser();
+
+    console.log(user);
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+```
+
+---
+
+# 5. Promise Utility Methods
+
+## Promise.all()
+
+Waits for all promises to succeed.
+
+```js
+const results = await Promise.all([
+  fetchUsers(),
+  fetchPosts(),
+  fetchComments(),
+]);
+```
+
+If one fails:
+
+```txt
+Entire Promise.all fails
+```
+
+---
+
+## Promise.allSettled()
+
+Waits for all promises regardless of success or failure.
+
+```js
+const results = await Promise.allSettled([
+  promise1,
+  promise2,
+  promise3,
+]);
+```
+
+Output:
+
+```js
+[
+  { status: "fulfilled" },
+  { status: "rejected" },
+]
+```
+
+---
+
+## Promise.race()
+
+Returns the first completed promise.
+
+```js
+const result = await Promise.race([
+  fetchApiA(),
+  fetchApiB(),
+]);
+```
+
+---
+
+## Promise.any()
+
+Returns the first successful promise.
+
+```js
+const result = await Promise.any([
+  promise1,
+  promise2,
+  promise3,
+]);
+```
+
+Useful for:
+
+- Multiple API endpoints
+- CDN fallbacks
+- Redundant services
+
+---
+
+# 6. Parallel vs Sequential Execution
+
+Understanding this is critical for backend performance.
+
+---
+
+## Sequential Execution
+
+Tasks run one after another.
+
+```js
+const users = await fetchUsers();
+const posts = await fetchPosts();
+const comments = await fetchComments();
+```
+
+Total Time:
+
+```txt
+1s + 1s + 1s = 3s
+```
+
+---
+
+## Parallel Execution
+
+Tasks run simultaneously.
+
+```js
+const [users, posts, comments] =
+  await Promise.all([
+    fetchUsers(),
+    fetchPosts(),
+    fetchComments(),
+  ]);
+```
+
+Total Time:
+
+```txt
+1s
+```
+
+if all requests take about 1 second.
+
+---
+
+## Common Performance Mistake
+
+Bad:
+
+```js
+for (const id of ids) {
+  const user = await fetchUser(id);
+
+  console.log(user);
+}
+```
+
+Better:
+
+```js
+const users = await Promise.all(
+  ids.map((id) => fetchUser(id))
+);
+
+console.log(users);
+```
+
+---
+
+# 7. Why Blocking the Event Loop is Dangerous
+
+Node.js uses a single-threaded event loop.
+
+If one task blocks it, all incoming requests wait.
+
+---
+
+## Blocking Example
+
+```js
+function heavyTask() {
+  let count = 0;
+
+  for (let i = 0; i < 1_000_000_000; i++) {
+    count++;
+  }
+
+  return count;
+}
+```
+
+During execution:
+
+- HTTP requests wait
+- Database responses wait
+- Timers wait
+- Entire server becomes slow
+
+---
+
+## Example in Express
+
+```js
+app.get("/", (req, res) => {
+  heavyTask();
+
+  res.send("Done");
+});
+```
+
+Every user will wait until `heavyTask()` finishes.
+
+---
+
+## Better Solutions
+
+### Use Worker Threads
+
+```js
+const { Worker } = require("worker_threads");
+```
+
+For:
+
+- Image processing
+- Video processing
+- Data analytics
+- CPU-intensive calculations
+
+---
+
+### Break Large Tasks Into Chunks
+
+```js
+setImmediate(() => {
+  processChunk();
+});
+```
+
+Allows the event loop to continue processing requests.
+
+---
+
+# Async Programming Flow
+
+```txt
+Call Stack
+    ↓
+Node APIs
+    ↓
+Microtask Queue (Promises)
+    ↓
+Macrotask Queue (setTimeout)
+    ↓
+Event Loop
+    ↓
+Call Stack
+```
+
+---
+
+# Important to understand
+
+### Why does Promise execute before setTimeout?
+
+Because Promise callbacks go to the **Microtask Queue**, which has higher priority than the **Macrotask Queue**.
+
+### Difference between Promise.all() and Promise.allSettled()?
+
+- `Promise.all()` fails if any promise fails.
+- `Promise.allSettled()` waits for every promise to finish.
+
+### Difference between async/await and .then()?
+
+- Both use Promises internally.
+- `async/await` makes asynchronous code look synchronous and is easier to read.
+
+### Why is blocking the event loop dangerous?
+
+Because Node.js handles many requests on one thread. A CPU-heavy task can delay all incoming requests.
+
+# Node.js Essentials
+
+Node.js is a JavaScript runtime built on Chrome's V8 engine. It is designed for scalable, high-performance, and event-driven applications.
+
+---
+
+# 1. How Node.js Works
+
+## Single-Threaded
+
+Node.js executes JavaScript on a single main thread.
+
+```js
+console.log("Task 1");
+console.log("Task 2");
+console.log("Task 3");
+```
+
+Output:
+
+```txt
+Task 1
+Task 2
+Task 3
+```
+
+---
+
+## Non-Blocking I/O
+
+Node.js does not wait for I/O operations to complete.
+
+```js
+const fs = require("fs");
+
+fs.readFile("data.txt", "utf8", (err, data) => {
+  console.log(data);
+});
+
+console.log("Reading file...");
+```
+
+Output:
+
+```txt
+Reading file...
+<file content>
+```
+
+---
+
+## libuv
+
+libuv is the library responsible for:
+
+- Event Loop
+- Async I/O
+- File System Operations
+- Networking
+- Thread Pool
+
+```txt
+JavaScript
+     ↓
+Event Loop
+     ↓
+libuv
+     ↓
+Operating System
+```
+
+---
+
+## Thread Pool
+
+Used for expensive asynchronous operations.
+
+Examples:
+
+- File System (`fs`)
+- DNS lookups
+- Crypto operations
+- Compression
+
+```txt
+Default Thread Pool Size = 4
+```
+
+Increase size:
+
+```bash
+UV_THREADPOOL_SIZE=8
+```
+
+---
+
+# 2. Core Modules
+
+Node.js provides built-in modules without installing packages.
+
+---
+
+## fs (File System)
+
+Read and write files.
+
+### Read File
+
+```js
+const fs = require("fs");
+
+fs.readFile("data.txt", "utf8", (err, data) => {
+  console.log(data);
+});
+```
+
+### Write File
+
+```js
+fs.writeFile("output.txt", "Hello", (err) => {
+  console.log("Written");
+});
+```
+
+---
+
+## path
+
+Work with file paths.
+
+```js
+const path = require("path");
+
+console.log(path.join("users", "profile.txt"));
+```
+
+Output:
+
+```txt
+users/profile.txt
+```
+
+---
+
+## http
+
+Create web servers.
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.end("Hello World");
+});
+
+server.listen(3000);
+```
+
+---
+
+## crypto
+
+Generate hashes and random values.
+
+```js
+const crypto = require("crypto");
+
+const hash = crypto
+  .createHash("sha256")
+  .update("password")
+  .digest("hex");
+
+console.log(hash);
+```
+
+---
+
+## os
+
+Get operating system information.
+
+```js
+const os = require("os");
+
+console.log(os.platform());
+console.log(os.cpus().length);
+```
+
+---
+
+## events
+
+Provides EventEmitter functionality.
+
+```js
+const events = require("events");
+```
+
+---
+
+## url
+
+Parse URLs.
+
+```js
+const url = require("url");
+
+const myUrl = new URL(
+  "https://example.com/users?id=1"
+);
+
+console.log(myUrl.searchParams.get("id"));
+```
+
+Output:
+
+```txt
+1
+```
+
+---
+
+# 3. EventEmitter
+
+EventEmitter is the foundation of many Node.js APIs.
+
+---
+
+## Creating an EventEmitter
+
+```js
+const EventEmitter = require("events");
+
+const emitter = new EventEmitter();
+```
+
+---
+
+## Listening to Events
+
+```js
+emitter.on("userCreated", () => {
+  console.log("User Created");
+});
+```
+
+---
+
+## Emitting Events
+
+```js
+emitter.emit("userCreated");
+```
+
+Output:
+
+```txt
+User Created
+```
+
+---
+
+## Passing Data
+
+```js
+emitter.on("login", (username) => {
+  console.log(`${username} logged in`);
+});
+
+emitter.emit("login", "john");
+```
+
+Output:
+
+```txt
+john logged in
+```
+
+---
+
+## Common Use Cases
+
+- Authentication systems
+- Logging
+- Notifications
+- File uploads
+- Background jobs
+
+---
+
+# 4. Streams and Buffers
+
+Very important for:
+
+- File uploads
+- Video streaming
+- Large file processing
+- Data pipelines
+
+---
+
+## Buffers
+
+Buffers store binary data.
+
+```js
+const buffer = Buffer.from("Hello");
+
+console.log(buffer);
+```
+
+Output:
+
+```txt
+<Buffer 48 65 6c 6c 6f>
+```
+
+---
+
+## Why Buffers?
+
+Computers store:
+
+- Files
+- Images
+- Videos
+- Network packets
+
+as binary data.
+
+---
+
+# Streams
+
+Streams process data in chunks rather than loading everything into memory.
+
+---
+
+## Read Stream
+
+```js
+const fs = require("fs");
+
+const readStream =
+  fs.createReadStream("large-file.txt");
+
+readStream.on("data", (chunk) => {
+  console.log(chunk);
+});
+```
+
+---
+
+## Write Stream
+
+```js
+const writeStream =
+  fs.createWriteStream("output.txt");
+
+writeStream.write("Hello");
+```
+
+---
+
+## Piping Streams
+
+```js
+const fs = require("fs");
+
+const read =
+  fs.createReadStream("input.txt");
+
+const write =
+  fs.createWriteStream("output.txt");
+
+read.pipe(write);
+```
+
+Benefits:
+
+- Faster
+- Less memory usage
+- Better performance
+
+---
+
+## Stream Types
+
+### Readable
+
+```js
+fs.createReadStream();
+```
+
+### Writable
+
+```js
+fs.createWriteStream();
+```
+
+### Duplex
+
+Can read and write.
+
+Example:
+
+```txt
+Socket Connections
+```
+
+### Transform
+
+Modifies data while streaming.
+
+Example:
+
+```txt
+Compression
+Encryption
+```
+
+---
+
+# 5. Environment Variables
+
+Environment variables store configuration outside code.
+
+Examples:
+
+- API Keys
+- Database URLs
+- Secrets
+- Port Numbers
+
+---
+
+## process.env
+
+```js
+console.log(process.env.NODE_ENV);
+```
+
+---
+
+## Setting Variables
+
+Linux/macOS:
+
+```bash
+PORT=3000 node app.js
+```
+
+Windows:
+
+```bash
+set PORT=3000 && node app.js
+```
+
+---
+
+## dotenv
+
+Install:
+
+```bash
+npm install dotenv
+```
+
+---
+
+### .env
+
+```env
+PORT=3000
+DB_URL=mongodb://localhost
+JWT_SECRET=mysecret
+```
+
+---
+
+### Usage
+
+```js
+require("dotenv").config();
+
+console.log(process.env.PORT);
+```
+
+---
+
+# 6. npm, pnpm, package.json, Semantic Versioning
+
+---
+
+## npm
+
+Node Package Manager.
+
+Initialize project:
+
+```bash
+npm init -y
+```
+
+Install package:
+
+```bash
+npm install express
+```
+
+---
+
+## pnpm
+
+Alternative package manager.
+
+Install:
+
+```bash
+npm install -g pnpm
+```
+
+Usage:
+
+```bash
+pnpm add express
+```
+
+Advantages:
+
+- Faster
+- Uses less disk space
+
+---
+
+## package.json
+
+Project metadata and dependencies.
+
+```json
+{
+  "name": "backend-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
+```
+
+---
+
+## Semantic Versioning
+
+Format:
+
+```txt
+MAJOR.MINOR.PATCH
+```
+
+Example:
+
+```txt
+1.4.2
+```
+
+### PATCH
+
+```txt
+1.4.2 → 1.4.3
+```
+
+Bug fixes.
+
+---
+
+### MINOR
+
+```txt
+1.4.2 → 1.5.0
+```
+
+New features.
+
+---
+
+### MAJOR
+
+```txt
+1.4.2 → 2.0.0
+```
+
+Breaking changes.
+
+---
+
+## Dependency Symbols
+
+### Exact Version
+
+```json
+"express": "4.18.2"
+```
+
+---
+
+### Caret (^)
+
+```json
+"express": "^4.18.2"
+```
+
+Allows:
+
+```txt
+4.x.x
+```
+
+---
+
+### Tilde (~)
+
+```json
+"express": "~4.18.2"
+```
+
+Allows:
+
+```txt
+4.18.x
+```
+
+---
+
+## Lockfiles
+
+Ensure identical installs.
+
+npm:
+
+```txt
+package-lock.json
+```
+
+pnpm:
+
+```txt
+pnpm-lock.yaml
+```
+
+Always commit lockfiles.
+
+---
+
+# 7. Worker Threads, Child Processes, and Clustering
+
+Used for CPU-intensive tasks.
+
+---
+
+## Worker Threads
+
+Run JavaScript on separate threads.
+
+```js
+const {
+  Worker,
+} = require("worker_threads");
+```
+
+Use for:
+
+- Image processing
+- Video processing
+- Data analysis
+- Heavy calculations
+
+---
+
+## Child Processes
+
+Execute external programs.
+
+```js
+const {
+  exec,
+} = require("child_process");
+
+exec("dir", (err, stdout) => {
+  console.log(stdout);
+});
+```
+
+Use for:
+
+- Running scripts
+- CLI tools
+- System commands
+
+---
+
+## Cluster
+
+Creates multiple Node.js processes.
+
+```js
+const cluster = require("cluster");
+```
+
+Example:
+
+```txt
+CPU Cores = 8
+
+Worker 1
+Worker 2
+Worker 3
+Worker 4
+...
+```
+
+Benefits:
+
+- Better CPU utilization
+- Higher throughput
+
+---
+
+# 8. Graceful Shutdown and SIGTERM
+
+A server should shut down cleanly.
+
+Reasons:
+
+- Prevent data loss
+- Finish active requests
+- Close database connections
+
+---
+
+## SIGTERM
+
+Common shutdown signal.
+
+```js
+process.on("SIGTERM", () => {
+  console.log("Shutting down...");
+});
+```
+
+---
+
+## Graceful Shutdown Example
+
+```js
+process.on("SIGTERM", () => {
+  server.close(() => {
+    console.log("Server closed");
+
+    process.exit(0);
+  });
+});
+```
+
+---
+
+## Database Cleanup
+
+```js
+process.on("SIGTERM", async () => {
+  await mongoose.connection.close();
+
+  process.exit(0);
+});
+```
+
+---
+
+## Production Scenario
+
+When running:
+
+```txt
+Docker
+Kubernetes
+PM2
+AWS
+Azure
+```
+
+a SIGTERM signal is generally sent before stopping your application.
+
+Handling it properly prevents interrupted requests and corrupted connections.
+
+---
+
+# Request Lifecycle in Node.js
+
+```txt
+Client Request
+      ↓
+HTTP Server
+      ↓
+Event Loop
+      ↓
+libuv
+      ↓
+OS Resources
+      ↓
+Callback / Promise
+      ↓
+Response Sent
+```
+
+---
+
+# Important to understand
+
+### Why is Node.js called single-threaded?
+
+JavaScript execution happens on a single main thread, while libuv uses background threads for I/O operations.
+
+### What is the difference between process and thread?
+
+- Process = Independent application instance.
+- Thread = Lightweight execution unit inside a process.
+
+### Why use streams instead of readFile()?
+
+Streams process data in chunks, reducing memory consumption and improving performance.
+
+### When should you use Worker Threads?
+
+For CPU-bound tasks that would otherwise block the event loop.
+
+### Why commit lockfiles?
+
+To ensure all developers and deployment environments install exactly the same dependency versions.
